@@ -1,10 +1,8 @@
-from sqlalchemy.orm import Session
 from src.orm.models.company import Company
 from src.orm.repositories.base import BaseRepository
 
 class CompanyRepository(BaseRepository):
-    def __init__(self, db: Session):
-        super().__init__(Company, db)
+    model = Company
 
     def create(self, user_id: int, company_name: str, ttn: str,
                phone: str, rep_full_name: str) -> Company:

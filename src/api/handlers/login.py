@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from src.api.services.utilities.hash_password import verify_password
 from src.orm.repositories.user import UserRepository
 from src.orm.models.user import User
-from src.orm.database import with_db
+from src.api.dependencies import with_db
 
 @with_db
 def login_user(username: str, password: str, db: Session = None) -> User:
@@ -13,4 +13,4 @@ def login_user(username: str, password: str, db: Session = None) -> User:
         raise HTTPException(status_code=401, detail = "Неверный email или пароль")
     if not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail = 'неверный email или пароль')
-    return user
+    return {"id": user.id, "email": user.email, "role": user.role}

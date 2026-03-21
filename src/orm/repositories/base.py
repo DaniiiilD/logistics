@@ -1,6 +1,10 @@
+from sqlalchemy.orm import Session
+
 class BaseRepository:
-    def __init__(self, model, db):
-        self.model = model
+    
+    model = None
+    
+    def __init__(self, db: Session):
         self.db = db
     
     def get_by_id(self, id):

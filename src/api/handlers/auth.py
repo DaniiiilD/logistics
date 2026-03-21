@@ -6,7 +6,7 @@ from src.orm.repositories.driver import DriverRepository
 from src.orm.repositories.company import CompanyRepository
 from src.schemas.requests.auth import DriverCreate, CompanyCreate
 from src.orm.models.user import User
-from src.orm.database import with_db
+from src.api.dependencies import with_db
 
 @with_db
 def register_driver(driver_data: DriverCreate, db: Session = None) -> User:
@@ -21,7 +21,7 @@ def register_driver(driver_data: DriverCreate, db: Session = None) -> User:
     driver_repo.create(user.id, driver_data.full_name, driver_data.phone, driver_data.transport_type)
     db.commit()
     db.refresh(user)
-    return user
+    return {"id": user.id, "email": user.email, "role": user.role}
 
 
 @with_db
@@ -37,4 +37,4 @@ def register_company(company_data: CompanyCreate, db: Session = None) -> User:
     company_repo.create(user.id, company_data.company_name, company_data.ttn, company_data.phone, company_data.rep_full_name)
     db.commit()
     db.refresh(user)
-    return user
+    return {"id": user.id, "email": user.email, "role": user.role}
