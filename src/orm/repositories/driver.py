@@ -1,12 +1,13 @@
 from src.orm.models.driver import Driver
 from src.orm.repositories.base import BaseRepository
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 class  DriverRepository(BaseRepository):
 
     model = Driver
         
-    def create(self, user_id: int, full_name: str, 
+    async def create(self, user_id: int, full_name: str, 
                phone: str, transport_type: str) ->  Driver:
         driver = Driver(
             user_id=user_id,
@@ -14,5 +15,5 @@ class  DriverRepository(BaseRepository):
             phone = phone,
             transport_type = transport_type    
         )
-        self.db.add(driver)
+        self.session.add(driver)
         return driver   

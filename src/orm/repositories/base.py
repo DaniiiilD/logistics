@@ -1,19 +1,24 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 class BaseRepository:
     
     model = None
     
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, session: AsyncSession):
+        self.session = session
     
-    def get_by_id(self, id):
-        return self.db.query(self.model).filter(self.model.id == id).first()
+    async def get_by_id(self, id):
+        result = await self.session.execute(
+            select(self.model).filter(self.model.id == id)
+        )
+        return result.scalar_one_or_none
     
-    def get_all(self):
-        return self.db.query(self.model).all()
+    async def get_all(self):
+        result = await self.session.execute(select(self.model))
+        return result.scalars().all()
     
-    def delete(self, id):
-        obj = self.get_by_id(id)
+    async def delete(self, id):
+        obj =  await self.get_by_id(id)
         if obj:
-            self.db.delete(obj)
+            await self.session.delete(obj)

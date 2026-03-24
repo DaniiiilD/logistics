@@ -8,9 +8,9 @@ auth_router = APIRouter(prefix='/auth', tags=['Регистрация'])
 
 
 @auth_router.post('/driver', response_model=UserResponse)
-def driver(driver_data: DriverCreate):
-    return register_driver(driver_data)
+async def driver(driver_data: DriverCreate):
+    return await register_driver(driver_data)
     
 @auth_router.post('/company', response_model=UserResponse)
-def company(company_data: CompanyCreate):
-    return register_company(company_data)
+async def company(company_data: CompanyCreate):
+    return await register_company(company_data)

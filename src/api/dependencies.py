@@ -1,17 +1,15 @@
 from functools import wraps
-from src.orm.database import SessionLocal
+from src.orm.database import db_factory
 
-def with_db(func):
+def in_session(func):
     @wraps(func)
-    def wrapper(*args, **kwargs):
-        db = SessionLocal()
-        try:
-            result = func(*args, db=db, **kwargs)
-            db.commit()
-            return result
-        except Exception:
-            db.rollback()
-            raise
-        finally:
-            db.close()
+    async def wrapper(*args, **kwargs):
+        async with db_factory.get_session() as session:
+            try:
+                result = await func(*args, session=session, **kwargs)
+                await session.commit()  
+                return result
+            except Exception:
+                await session.rollback()
+                raise
     return wrapper

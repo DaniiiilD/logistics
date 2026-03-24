@@ -1,10 +1,11 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from src.orm.models.company import Company
 from src.orm.repositories.base import BaseRepository
 
 class CompanyRepository(BaseRepository):
     model = Company
 
-    def create(self, user_id: int, company_name: str, ttn: str,
+    async def create(self, user_id: int, company_name: str, ttn: str,
                phone: str, rep_full_name: str) -> Company:
         company = Company(
             user_id=user_id,
@@ -13,5 +14,5 @@ class CompanyRepository(BaseRepository):
             phone=phone,
             rep_full_name=rep_full_name
         )
-        self.db.add(company)
+        self.session.add(company)
         return company
