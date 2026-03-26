@@ -1,3 +1,4 @@
+import contextvars
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from src.config import settings
@@ -18,13 +19,21 @@ async_session = async_sessionmaker(
 class Base(DeclarativeBase):
     pass
 
+db_session = contextvars.ContextVar('db_session')
+
 @asynccontextmanager
 async def async_session_factory() -> AsyncGenerator[AsyncSession, None]:
-    session = async_session()
-    try:
-        yield session
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
+    session_ = db_session.get(None)
+    if session_:
+        yield session_
+    else: 
+        session_ = async_session()
+        token = db_session.set(session_)
+        try:
+            yield session_
+        except Exception:
+            await session_.rollback()
+            raise
+        finally:    
+            await session_.close()
+            db_session.reset(token)
