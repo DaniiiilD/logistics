@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from src.schemas.responses.auth import UserResponse
 from src.schemas.requests.auth import DriverCreate, CompanyCreate
 from src.api.handlers.auth import register_driver, register_company
