@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.api.views.auth.__init__ import main_router
+from src.api.views import api_router
 
 app = FastAPI(title="Logistics App")
-app.include_router(main_router)
+app.include_router(api_router)
