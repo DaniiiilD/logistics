@@ -10,23 +10,23 @@ DATABASE_URL = f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASS}@{set
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 async_session = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autoflush=False
-    )
+    bind=engine, class_=AsyncSession, expire_on_commit=False, autoflush=False
+)
+
 
 class Base(DeclarativeBase):
     pass
 
-db_session = contextvars.ContextVar('db_session')
+
+db_session = contextvars.ContextVar("db_session")
+
 
 @asynccontextmanager
 async def async_session_factory() -> AsyncGenerator[AsyncSession, None]:
     session_ = db_session.get(None)
     if session_:
         yield session_
-    else: 
+    else:
         session_ = async_session()
         token = db_session.set(session_)
         try:
@@ -34,6 +34,6 @@ async def async_session_factory() -> AsyncGenerator[AsyncSession, None]:
         except Exception:
             await session_.rollback()
             raise
-        finally:    
+        finally:
             await session_.close()
             db_session.reset(token)

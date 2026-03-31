@@ -1,11 +1,13 @@
 from pydantic import BaseModel
 
+
 class DriverCreate(BaseModel):
     email: str
     password: str
     full_name: str
     phone: str
     transport_type: str
+
 
 class CompanyCreate(BaseModel):
     email: str
