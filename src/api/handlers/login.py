@@ -6,8 +6,7 @@ from src.api.middlewares.jwt_token import create_access_token
 
 
 class LoginService:
-    def __init__(self,
-                 user_repo: UserRepository = Depends()):
+    def __init__(self, user_repo: UserRepository = Depends()):
         self.user_repo = user_repo
 
     async def login_user(
@@ -21,7 +20,7 @@ class LoginService:
         if not verify_password(password, user.hashed_password):
             raise HTTPException(status_code=401, detail="неверный email или пароль")
 
-        access_token = create_access_token(data={"sub": username})
+        access_token = create_access_token(data={"sub": str(user.id)})
 
         response.set_cookie(
             key="access_token", value=access_token, httponly=True, max_age=30 * 60

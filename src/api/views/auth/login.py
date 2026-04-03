@@ -19,4 +19,3 @@ async def login(
     return await login_service.login_user(
         credentials.username, credentials.password, response
     )
-    # login_user(credentials.username, credentials.password, response)

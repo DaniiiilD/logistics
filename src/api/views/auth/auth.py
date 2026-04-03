@@ -13,13 +13,8 @@ auth_router = APIRouter(prefix="/auth", tags=["Регистрация"])
 async def driver(
     driver_data: DriverCreate,
     registration_service: RegistrationService = Depends(),
-    #  user_repo: UserRepository = Depends(),
-    #  driver_repo: DriverRepository = Depends()
 ):
     return await registration_service.register_driver(driver_data)
-
-
-# register_driver(driver_data, user_repo, driver_repo)
 
 
 @auth_router.post("/company", response_model=UserResponse)
@@ -29,6 +24,3 @@ async def company(
 ):
 
     return await registration_service.register_company(company_data)
-
-
-# register_company(company_data, user_repo, company_repo)
