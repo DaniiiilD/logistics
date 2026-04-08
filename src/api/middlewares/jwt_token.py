@@ -1,7 +1,7 @@
 from src.config import settings
 from datetime import datetime, timedelta, timezone
 import jwt
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, Depends
 from jwt import PyJWKError
 
 
@@ -19,7 +19,7 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 
-async def get_user_if_from_token(request: Request) -> int:
+async def get_current_user_payload(request: Request) -> int:
 
     token = request.cookies.get("access_token")
 
@@ -34,7 +34,23 @@ async def get_user_if_from_token(request: Request) -> int:
         raise HTTPException(status_code=401, detail="Токен невалиден или протух")
 
     user_id_str = payload.get("sub")
-    if not user_id_str:
-        raise HTTPException(status_code=401, detail="В токене нет user_id")
+    role = payload.get("role")
 
-    return int(user_id_str)
+    if not user_id_str or not role:
+        raise HTTPException(status_code=401, detail="Невалидный токен")
+
+    return {"id": int(user_id_str), "role": role}
+
+
+async def require_driver(payload: dict = Depends(get_current_user_payload)) -> int:
+    """(проверка на водителя) и return его user_id"""
+    if payload["role"] != "driver":
+        raise HTTPException(status_code=403, detail="Доступ только для водителей!")
+    return payload["id"]
+
+
+async def require_company(payload: dict = Depends(get_current_user_payload)) -> int:
+    """(пускает только компании) и return его user_id"""
+    if payload["role"] != "company":
+        raise HTTPException(status_code=403, detail="Доступ только для комапний!")
+    return payload["id"]

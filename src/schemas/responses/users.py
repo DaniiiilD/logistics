@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Union
 
 
 class BaseProfileResponse(BaseModel):
@@ -7,8 +6,7 @@ class BaseProfileResponse(BaseModel):
     email: str
     role: str
 
-
-model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DriverProfileResponse(BaseProfileResponse):
@@ -22,6 +20,3 @@ class CompanyProfileResponse(BaseProfileResponse):
     phone: str
     company_name: str
     rep_full_name: str
-
-
-ProfileResponse = Union[DriverProfileResponse, CompanyProfileResponse]

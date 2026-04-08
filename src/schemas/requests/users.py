@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, Union
+from typing import Optional
 
 
 class DriverUpdate(BaseModel):
@@ -15,6 +15,3 @@ class CompanyUpdate(BaseModel):
     ttn: Optional[str] = None
     phone: Optional[str] = None
     rep_full_name: Optional[str] = None
-
-
-ProfileUpdate = Union[DriverUpdate, CompanyUpdate]
