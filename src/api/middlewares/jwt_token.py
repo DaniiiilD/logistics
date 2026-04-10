@@ -19,7 +19,7 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 
-async def get_current_user_payload(request: Request) -> int:
+async def get_current_user_payload(request: Request) -> dict:
 
     token = request.cookies.get("access_token")
 
@@ -42,15 +42,11 @@ async def get_current_user_payload(request: Request) -> int:
     return {"id": int(user_id_str), "role": role}
 
 
-async def require_driver(payload: dict = Depends(get_current_user_payload)) -> int:
-    """(проверка на водителя) и return его user_id"""
-    if payload["role"] != "driver":
-        raise HTTPException(status_code=403, detail="Доступ только для водителей!")
-    return payload["id"]
+class RoleChecker:
+    def __init__(self, allowed_roles: list[str]):
+        self.allowed_roles = allowed_roles
 
-
-async def require_company(payload: dict = Depends(get_current_user_payload)) -> int:
-    """(пускает только компании) и return его user_id"""
-    if payload["role"] != "company":
-        raise HTTPException(status_code=403, detail="Доступ только для комапний!")
-    return payload["id"]
+    def __call__(self, payload: dict = Depends(get_current_user_payload)) -> int:
+        if payload["role"] not in self.allowed_roles:
+            raise HTTPException(status_code=403, detail="Недостаточео прав")
+        return payload["id"]

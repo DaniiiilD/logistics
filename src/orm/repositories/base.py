@@ -15,12 +15,6 @@ class BaseRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_user_id(self, user_id: int):
-        result = await self.session.execute(
-            select(self.model).where(self.model.user_id == user_id)
-        )
-        return result.scalar_one_or_none()
-
     async def get_all(self):
         result = await self.session.execute(select(self.model))
         return result.scalars().all()

@@ -44,6 +44,21 @@ class VehicleService:
 
         return vehicles
 
+    async def get_vehicle(self, user_id: int, vehicle_id: int) -> VehicleResponse:
+        driver = await self.driver_repo.get_by_user_id(user_id)
+
+        if not driver:
+            raise HTTPException(status_code=404, detail="Водитель не найден")
+
+        vehicle = await self.vehicle_repo.get_by_id(vehicle_id)
+        if not vehicle:
+            raise HTTPException(status_code=404, detail="Трансопрт не найден")
+
+        if vehicle.driver_id != driver.id:
+            raise HTTPException(status_code=403, detail="Это не ваша машина")
+
+        return await vehicle
+
     async def delete_vehicle(self, user_id: int, vehicle_id: int):
         driver = await self.driver_repo.get_by_user_id(user_id)
 
