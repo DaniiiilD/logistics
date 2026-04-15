@@ -14,9 +14,13 @@ class DriverProfileResponse(BaseProfileResponse):
     phone: str
     transport_type: str
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CompanyProfileResponse(BaseProfileResponse):
     ttn: str
     phone: str
     company_name: str
     rep_full_name: str
+
+    model_config = ConfigDict(from_attributes=True)

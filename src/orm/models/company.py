@@ -16,3 +16,4 @@ class Company(Base):
     rep_full_name = Column(String, nullable=True)
 
     user = relationship("User", back_populates="company")
+    orders = relationship("Order", back_populates="company")

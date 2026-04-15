@@ -5,7 +5,7 @@ from src.api.middlewares.jwt_token import RoleChecker
 from src.schemas.requests.users import DriverUpdate
 from src.schemas.responses.users import DriverProfileResponse
 
-driver_profile_router = APIRouter(prefix="/profile/driver", tags=["Профиль водителя"])
+driver_profile_router = APIRouter(prefix="/profile", tags=["Профиль водителя"])
 
 
 @driver_profile_router.get("", response_model=DriverProfileResponse)

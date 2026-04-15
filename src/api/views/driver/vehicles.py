@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from src.api.middlewares.session import in_session
 from src.api.handlers.vehicle import VehicleService
 from src.api.middlewares.jwt_token import RoleChecker
-from src.schemas.requests.vehicles import VehicleCreate
+from src.schemas.requests.vehicles import VehicleCreate, VehicleUpdate
 from src.schemas.responses.vehicles import VehicleResponse
 from typing import List
 
@@ -47,3 +47,14 @@ async def delete_my_vehicle(
 ):
     await service.delete_vehicle(user_id, vehicle_id)
     return {"message:Машина удалена"}
+
+
+@vehicle_router.patch("/{vehicle_id}", response_model=VehicleResponse)
+@in_session
+async def update_my_vehicle(
+    vehicle_id: int,
+    data: VehicleUpdate,
+    user_id: int = Depends(RoleChecker(["driver"])),
+    service: VehicleService = Depends(),
+):
+    return await service.update_vehicle(user_id, vehicle_id, data)

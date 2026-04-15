@@ -1,12 +1,27 @@
-# Python-generated files
+.venv
+
+.env
+
+.venv/
+venv/
+env/
+
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
 build/
 dist/
 wheels/
 *.egg-info
 
-# Virtual environments
-.venv
+.ruff_cache/
+.pytest_cache/
 
-.env
+celerybeat-schedule
+celerybeat.pid
+
+.vscode/
+.idea/
+
+.DS_Store
+Thumbs.db

@@ -5,7 +5,7 @@ from src.api.middlewares.jwt_token import RoleChecker
 from src.schemas.requests.users import CompanyUpdate
 from src.schemas.responses.users import CompanyProfileResponse
 
-company_profile_router = APIRouter(prefix="/profile/company", tags=["Профиль компании"])
+company_profile_router = APIRouter(prefix="/profile", tags=["Профиль компании"])
 
 
 @company_profile_router.get("", response_model=CompanyProfileResponse)

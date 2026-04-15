@@ -1,9 +1,10 @@
 from src.orm.repositories.vehicle import VehicleRepository
 from src.orm.repositories.driver import DriverRepository
-from src.schemas.requests.vehicles import VehicleCreate
+from src.schemas.requests.vehicles import VehicleCreate, VehicleUpdate
 from src.schemas.responses.vehicles import VehicleResponse
 from fastapi import HTTPException, Depends
 from src.orm.models.vehicle import Vehicle
+from src.config import settings
 
 
 class VehicleService:
@@ -24,8 +25,11 @@ class VehicleService:
 
         vehicles = await self.vehicle_repo.get_vehicle_by_driver_id(driver.id)
 
-        if len(vehicles) >= 3:
-            raise HTTPException(status_code=400, detail="Максимум 3 машины")
+        if len(vehicles) >= settings.MAX_VEHICLES_PER_DRIVER:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Максимум {settings.MAX_VEHICLES_PER_DRIVER} машины",
+            )
 
         vehicle_dict = data.model_dump()
         vehicle_dict["driver_id"] = driver.id
@@ -73,3 +77,24 @@ class VehicleService:
             raise HTTPException(status_code=403, detail="Это не ваша машина")
 
         await self.vehicle_repo.delete(vehicle.id)
+
+    async def update_vehicle(
+        self, user_id: int, vehicle_id: int, data: VehicleUpdate
+    ) -> VehicleResponse:
+        driver = await self.driver_repo.get_by_user_id(user_id)
+        if not driver:
+            raise HTTPException(status_code=404, detail="Водитель не найден")
+
+        vehicle = self.vehicle_repo.get_by_id(vehicle_id)
+        if not vehicle:
+            raise HTTPException(status_code=404, detail="Транспорт не найден")
+
+        if vehicle.driver_id != driver.id:
+            raise HTTPException(status_code=403, detail="это не ваша машина")
+
+        update_data = data.model_dump(exclude_unset=True)
+        if not update_data:
+            raise HTTPException(status_code=400, detail="Нет данных для обновления")
+
+        updated_data = await self.vehicle_repo.update(vehicle.id, update_data)
+        return updated_data
