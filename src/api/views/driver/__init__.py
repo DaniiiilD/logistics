@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from .profile import driver_profile_router
-from .vehicles import vehicle_router
+from .profile import router as driver_profile_router
+from .vehicles import router as vehicle_router
 
 driver_router = APIRouter(prefix="/driver")
 

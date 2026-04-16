@@ -51,7 +51,7 @@ class UserService:
         if not user:
             raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-        if "email" in update_data:
+        if update_data.get("email"):
             await self.user_repo.update(user.id, {"email": update_data.pop("email")})
 
         if update_data:

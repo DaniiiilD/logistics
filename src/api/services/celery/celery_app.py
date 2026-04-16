@@ -1,5 +1,5 @@
 from celery import Celery
-from src.config import settings
+from core.config import settings
 
 celery_instance = Celery(
     "logistics_tasks",

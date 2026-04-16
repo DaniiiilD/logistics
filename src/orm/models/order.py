@@ -1,6 +1,7 @@
 from src.orm.database import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Enum, Boolean
+from src.core.constants import OrderStatus
 
 
 class Order(Base):
@@ -13,6 +14,6 @@ class Order(Base):
     transport_type = Column(String, nullable=False)
     from_date = Column(DateTime, nullable=False)
     to_date = Column(DateTime, nullable=False)
-    status = Column(String, default="search", nullable=False)
-
+    status = Column(Enum(OrderStatus), default=OrderStatus.SEARCH, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
     company = relationship("Company", back_populates="orders")

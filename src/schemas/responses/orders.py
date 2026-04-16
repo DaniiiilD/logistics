@@ -9,5 +9,6 @@ class OrderResponse(BaseModel):
     company_id: int
     status: str
     transport_type: str
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

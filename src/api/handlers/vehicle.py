@@ -4,7 +4,7 @@ from src.schemas.requests.vehicles import VehicleCreate, VehicleUpdate
 from src.schemas.responses.vehicles import VehicleResponse
 from fastapi import HTTPException, Depends
 from src.orm.models.vehicle import Vehicle
-from src.config import settings
+from src.core.constants import MAX_VEHICLES_PER_DRIVER
 
 
 class VehicleService:
@@ -25,10 +25,10 @@ class VehicleService:
 
         vehicles = await self.vehicle_repo.get_vehicle_by_driver_id(driver.id)
 
-        if len(vehicles) >= settings.MAX_VEHICLES_PER_DRIVER:
+        if len(vehicles) >= MAX_VEHICLES_PER_DRIVER:
             raise HTTPException(
                 status_code=400,
-                detail=f"Максимум {settings.MAX_VEHICLES_PER_DRIVER} машины",
+                detail=f"Максимум {MAX_VEHICLES_PER_DRIVER} машины",
             )
 
         vehicle_dict = data.model_dump()

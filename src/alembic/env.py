@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.orm.database import Base, DATABASE_URL
 
@@ -15,6 +16,11 @@ from src.orm.database import Base, DATABASE_URL
 config = context.config
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
+from src.orm.models.user import User
+from src.orm.models.company import Company
+from src.orm.models.driver import Driver
+from src.orm.models.order import Order
+from src.orm.models.vehicle import Vehicle
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

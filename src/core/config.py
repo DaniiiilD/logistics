@@ -12,8 +12,6 @@ class Settings(BaseSettings):
     ALGORITHM: str
     EXPIRE_MINUTES: int
 
-    MAX_VEHICLES_PER_DRIVER: int = 3
-
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
 
