@@ -1,7 +1,7 @@
 from src.orm.models.order import Order
 from src.orm.repositories.base import BaseRepository
 from sqlalchemy import select
-
+from src.core.constants import OrderStatus
 
 class OrderRepository(BaseRepository):
     model = Order
@@ -21,3 +21,12 @@ class OrderRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+    
+    async def get_suitable_orders(self, transport_type: str):
+        query = select(Order).where(
+            Order.transport_type == transport_type,
+            Order.status == OrderStatus.SEARCH,
+            Order.is_active
+        )
+        result = await self.session.execute(query)
+        return result.scalars().all()
