@@ -17,3 +17,5 @@ class Order(Base):
     status = Column(Enum(OrderStatus), default=OrderStatus.SEARCH, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     company = relationship("Company", back_populates="orders")
+
+    order_offers = relationship("OrderOffer", back_populates="order")

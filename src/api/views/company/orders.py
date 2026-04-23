@@ -3,7 +3,7 @@ from src.api.middlewares.session import in_session
 from src.api.middlewares.jwt_token import RoleChecker
 from src.schemas.responses.orders import OrderResponse
 from src.schemas.requests.orders import OrderCreate, OrderUpdate
-from src.api.handlers.order import OrderService
+from api.handlers.company.order import OrderService
 from src.core.constants import Role
 
 router = APIRouter(prefix="/orders", tags=["Заявки компаний"])

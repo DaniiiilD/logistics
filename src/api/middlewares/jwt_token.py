@@ -1,4 +1,4 @@
-from core.config import settings
+from src.core.config import settings
 from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import Request, HTTPException, Depends

@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException
 from src.orm.repositories.order import OrderRepository
 from src.schemas.requests.orders import OrderCreate, OrderUpdate
-from src.orm.models.order import Order
-from src.api.services.celery.tasks import send_email_to_driver
+from src.orm.models.company.order import Order
+from src.api.services.celery.tasks import send_notification_email
 from src.orm.repositories.user import UserRepository
 from src.orm.repositories.company import CompanyRepository
 from src.orm.repositories.driver import DriverRepository
@@ -39,21 +39,27 @@ class OrderService:
         drivers_emails = await self.user_repo.get_email_by_transport(
             new_order.transport_type
         )
+        
+        driver_message = (
+            f'Здравствуйте, Появилась новая заявка на перевозку {new_order.id}.'
+            f'Требуемый транспорт: {new_order.transport_type}.'
+            f'Зайдите в прилодение, чтобы откликнутся.'
+        )
+        
         for email in drivers_emails:
-            send_email_to_driver.delay(email, new_order.id)
+            send_notification_email.delay(email, new_order.id, driver_message)
 
         return new_order
 
     async def get_my_orders(self, user_id) -> list[Order]:
-        company = self.get_company(user_id)
+        company = await self.get_company(user_id)
         return await self.order_repo.get_active_order_by_company(company.id)
 
     async def get_order(self, user_id: int, order_id: int) -> Order:
-        company = await self.get_company(user_id)
-        order = await self.order_repo.get_active_order_by_id(company.id, order_id)
+        order = await self.order_repo.get_order_for_company_by_user(user_id, order_id)
         if not order:
             raise HTTPException(status_code=404, detail="Заказ не найден")
-        return Order
+        return order
 
     async def update_order(
         self, user_id: int, order_id: int, data: OrderUpdate
@@ -68,12 +74,3 @@ class OrderService:
         order = await self.get_order(user_id, order_id)
         await self.order_repo.update(order.id, {"is_active": False})
         
-    async def suitable_orders_for_drivers(self, user_id: int) -> list[Order]:
-        driver = await self.driver_repo.get_by_user_id(user_id)
-        if not driver:
-            raise HTTPException(status_code=404, detail="Водиетль не найден")
-        driver_transport = driver.transport_type
-        if driver_transport is None:
-            return []
-        result = await self.order_repo.get_suitable_orders(driver_transport)
-        return result

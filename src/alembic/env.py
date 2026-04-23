@@ -19,8 +19,9 @@ config.set_main_option("sqlalchemy.url", DATABASE_URL)
 from src.orm.models.user import User
 from src.orm.models.company import Company
 from src.orm.models.driver import Driver
-from src.orm.models.order import Order
-from src.orm.models.vehicle import Vehicle
+from src.orm.models.company.order import Order
+from orm.models.vehicle.vehicle import Vehicle
+from src.orm.models.driver.offer import OrderOffer
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
