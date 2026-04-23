@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from src.orm.database import Base
+from sqlalchemy.orm import relationship
 
 
 class Driver(Base):
@@ -12,3 +13,5 @@ class Driver(Base):
     full_name = Column(String, nullable=False)
     phone = Column(String, nullable=False)
     transport_type = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="driver")

@@ -28,3 +28,13 @@ class BaseRepository:
         self.session.add(obj)
         await self.session.flush()
         return obj
+
+    async def update(self, id: int, update_data: dict):
+        obj = await self.get_by_id(id)
+        if not obj:
+            return None
+
+        for key, value in update_data.items():
+            setattr(obj, key, value)
+
+        return obj

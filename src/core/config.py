@@ -12,6 +12,18 @@ class Settings(BaseSettings):
     ALGORITHM: str
     EXPIRE_MINUTES: int
 
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+
+    EMAIL_HOST: str
+    EMAIL_PORT: int
+    EMAIL_USER: str
+    EMAIL_PASS: str
+
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+
     class Config:
         env_file = ".env"
 
