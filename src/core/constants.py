@@ -16,6 +16,7 @@ class OrderStatus(str, Enum):
     DONE = "done"
     CANCELLED = "cancelled"
 
+
 class OfferStatus(str, Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"

@@ -6,6 +6,7 @@ from src.api.services.celery.tasks import send_notification_email
 from src.orm.repositories.user import UserRepository
 from src.orm.repositories.company import CompanyRepository
 from src.orm.repositories.driver import DriverRepository
+from src.api.services.celery.message_text import NEW_ORDER_NOTIFICATION
 
 
 class OrderService:
@@ -14,7 +15,7 @@ class OrderService:
         order_repo: OrderRepository = Depends(),
         company_repo: CompanyRepository = Depends(),
         user_repo: UserRepository = Depends(),
-        driver_repo: DriverRepository = Depends()
+        driver_repo: DriverRepository = Depends(),
     ):
 
         self.order_repo = order_repo
@@ -39,13 +40,11 @@ class OrderService:
         drivers_emails = await self.user_repo.get_email_by_transport(
             new_order.transport_type
         )
-        
-        driver_message = (
-            f'Здравствуйте, Появилась новая заявка на перевозку {new_order.id}.'
-            f'Требуемый транспорт: {new_order.transport_type}.'
-            f'Зайдите в прилодение, чтобы откликнутся.'
+
+        driver_message = NEW_ORDER_NOTIFICATION.format(
+            order_id=new_order.id, transport_type=new_order.transport_type
         )
-        
+
         for email in drivers_emails:
             send_notification_email.delay(email, new_order.id, driver_message)
 
@@ -73,4 +72,3 @@ class OrderService:
     async def delete_order(self, user_id: int, order_id: int):
         order = await self.get_order(user_id, order_id)
         await self.order_repo.update(order.id, {"is_active": False})
-        
