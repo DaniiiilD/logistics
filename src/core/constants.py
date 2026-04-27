@@ -15,3 +15,9 @@ class OrderStatus(str, Enum):
     IN_PROGRESS = "in_progress"
     DONE = "done"
     CANCELLED = "cancelled"
+
+
+class OfferStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"

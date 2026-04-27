@@ -3,7 +3,7 @@ from src.orm.repositories.driver import DriverRepository
 from src.schemas.requests.vehicles import VehicleCreate, VehicleUpdate
 from src.schemas.responses.vehicles import VehicleResponse
 from fastapi import HTTPException, Depends
-from src.orm.models.vehicle import Vehicle
+from src.orm.models.vehicle.vehicle import Vehicle
 from src.core.constants import MAX_VEHICLES_PER_DRIVER
 
 

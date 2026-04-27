@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.api.middlewares.session import in_session
-from src.api.handlers.vehicle import VehicleService
+from api.handlers.vehicle.vehicle import VehicleService
 from src.api.middlewares.jwt_token import RoleChecker
 from src.schemas.requests.vehicles import VehicleCreate, VehicleUpdate
 from src.schemas.responses.vehicles import VehicleResponse

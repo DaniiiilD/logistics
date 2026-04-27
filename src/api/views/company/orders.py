@@ -3,8 +3,9 @@ from src.api.middlewares.session import in_session
 from src.api.middlewares.jwt_token import RoleChecker
 from src.schemas.responses.orders import OrderResponse
 from src.schemas.requests.orders import OrderCreate, OrderUpdate
-from src.api.handlers.order import OrderService
+from api.handlers.company.order import OrderService
 from src.core.constants import Role
+from src.schemas.responses.offer import CompanyViewOfferDriverResponse
 
 router = APIRouter(prefix="/orders", tags=["Заявки компаний"])
 
@@ -58,3 +59,23 @@ async def delete_order(
 ):
     await service.delete_order(user_id, order_id)
     return {"meassage": "Заказ отменен(скрыт)"}
+
+
+@router.patch("/offers/{offer_id}/accept")
+@in_session
+async def accept_driver_offer(
+    offer_id: int,
+    user_id: int = Depends(RoleChecker([Role.COMPANY])),
+    service: OrderService = Depends(),
+):
+    return await service.accept_offer(user_id, offer_id)
+
+
+@router.get("/{order_id}/offers", response_model=list[CompanyViewOfferDriverResponse])
+@in_session
+async def view_order_offers(
+    order_id: int,
+    user_id: int = Depends(RoleChecker([Role.COMPANY])),
+    service: OrderService = Depends(),
+):
+    return await service.get_order_offers(user_id, order_id)

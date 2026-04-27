@@ -15,3 +15,5 @@ class Driver(Base):
     transport_type = Column(String, nullable=True)
 
     user = relationship("User", back_populates="driver")
+
+    order_offers = relationship("OrderOffer", back_populates="driver")

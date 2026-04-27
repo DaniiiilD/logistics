@@ -1,6 +1,6 @@
 from src.orm.repositories.base import BaseRepository
 from sqlalchemy import select
-from src.orm.models.vehicle import Vehicle
+from orm.models.vehicle.vehicle import Vehicle
 
 
 class VehicleRepository(BaseRepository):
