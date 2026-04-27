@@ -5,7 +5,7 @@ from src.orm.repositories.driver import DriverRepository
 from src.orm.models.driver.offer import OrderOffer
 from src.core.constants import OrderStatus
 from src.api.services.celery.tasks import send_notification_email
-from src.api.services.celery.message_text import NEW_OFFER_NOTIFICATION
+from src.api.services.celery.message_text import NotificationMessages
 
 
 class DriverOfferService:
@@ -45,7 +45,7 @@ class DriverOfferService:
             OrderOffer(order_id=order.id, driver_id=driver.id)
         )
 
-        message = NEW_OFFER_NOTIFICATION.format(order_id=order.id)
+        message = NotificationMessages.new_offer_to_company(order_id=order.id)
 
         company_email = order.company.user.email
         send_notification_email.delay(company_email, order.id, message)

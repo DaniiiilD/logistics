@@ -6,7 +6,9 @@ from src.api.services.celery.tasks import send_notification_email
 from src.orm.repositories.user import UserRepository
 from src.orm.repositories.company import CompanyRepository
 from src.orm.repositories.driver import DriverRepository
-from src.api.services.celery.message_text import NEW_ORDER_NOTIFICATION
+from src.orm.repositories.offer import OfferRepository
+from src.api.services.celery.message_text import NotificationMessages
+from src.core.constants import OfferStatus, OrderStatus
 
 
 class OrderService:
@@ -16,12 +18,14 @@ class OrderService:
         company_repo: CompanyRepository = Depends(),
         user_repo: UserRepository = Depends(),
         driver_repo: DriverRepository = Depends(),
+        offer_repo: OfferRepository = Depends(),
     ):
 
         self.order_repo = order_repo
         self.company_repo = company_repo
         self.user_repo = user_repo
         self.driver_repo = driver_repo
+        self.offer_repo = offer_repo
 
     async def get_company(self, user_id: int):
         """метож чтоб не дублировать код с поиком компании"""
@@ -41,7 +45,7 @@ class OrderService:
             new_order.transport_type
         )
 
-        driver_message = NEW_ORDER_NOTIFICATION.format(
+        driver_message = NotificationMessages.new_order(
             order_id=new_order.id, transport_type=new_order.transport_type
         )
 
@@ -72,3 +76,40 @@ class OrderService:
     async def delete_order(self, user_id: int, order_id: int):
         order = await self.get_order(user_id, order_id)
         await self.order_repo.update(order.id, {"is_active": False})
+
+    async def accept_offer(self, user_id: int, offer_id: int):
+        offer = await self.offer_repo.get_offer_with_relations(offer_id)
+        if not offer:
+            raise HTTPException(status_code=404, detail="Отклмк не найден")
+
+        order = await self.order_repo.get_order_for_company_by_user(
+            user_id, offer.order_id
+        )
+        if not order:
+            raise HTTPException(status_code=403, detail="У вас нет прав на этот заказ")
+
+        await self.offer_repo.update(offer.id, {"status": OfferStatus.ACCEPTED})
+        await self.order_repo.update(order.id, {"status": OrderStatus.IN_PROGRESS})
+
+        other_offers = await self.offer_repo.get_other_offers_with_email_for_reject(
+            order.id, offer.id
+        )
+
+        for other in other_offers:
+            await self.offer_repo.update(other.id, {"status": OfferStatus.REJECTED})
+            rejected_msg = NotificationMessages.offer_rejected(order_id=order.id)
+            send_notification_email.delay(
+                other.driver.user.email, order.id, rejected_msg
+            )
+
+        accepted_msg = NotificationMessages.offer_accepted(order_id=order.id)
+        send_notification_email.delay(offer.driver.user.email, order.id, accepted_msg)
+
+        return {"message": "Исполнитель выбран, остальные заявки отклонены"}
+
+    async def get_order_offers(self, user_id: int, order_id: int):
+        order = await self.order_repo.get_order_for_company_by_user(user_id, order_id)
+        if not order:
+            raise HTTPException(status_code=403, detail="У вас нет прав на этот заказ")
+
+        return await self.offer_repo.get_all_offers_by_order(order.id)

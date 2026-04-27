@@ -6,20 +6,11 @@ from typing import List
 from api.handlers.driver.offer import DriverOfferService
 from src.schemas.responses.offer import OfferResponse
 
-router = APIRouter(tags=["Отклики водителя"])
+
+router = APIRouter(prefix="/offers", tags=["Отклики водителя"])
 
 
-@router.post("/orders/{order_id}/offers", response_model=OfferResponse)
-@in_session
-async def reply_offer(
-    order_id: int,
-    user_id: int = Depends(RoleChecker([Role.DRIVER])),
-    service: DriverOfferService = Depends(),
-):
-    return await service.create_offer(user_id, order_id)
-
-
-@router.get("/offers/my", response_model=List[OfferResponse])
+@router.get("", response_model=List[OfferResponse])
 @in_session
 async def get_all_offers(
     user_id: int = Depends(RoleChecker([Role.DRIVER])),
@@ -28,7 +19,7 @@ async def get_all_offers(
     return await service.get_all_offers(user_id)
 
 
-@router.delete("/offers/{offer_id}")
+@router.delete("/{offer_id}")
 @in_session
 async def delete_my_offer(
     offer_id: int,
@@ -36,4 +27,4 @@ async def delete_my_offer(
     service: DriverOfferService = Depends(),
 ):
     await service.delete_offer(user_id, offer_id)
-    return {"message: Отлик успешно отозван"}
+    return {"message": "Отлик успешно отозван"}
