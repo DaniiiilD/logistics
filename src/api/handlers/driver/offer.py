@@ -6,6 +6,8 @@ from src.orm.models.driver.offer import OrderOffer
 from src.core.constants import OrderStatus
 from src.api.services.celery.tasks import send_notification_email
 from src.api.services.celery.message_text import NotificationMessages
+from typing import Optional
+from src.core.constants import OfferStatus
 
 
 class DriverOfferService:
@@ -52,14 +54,6 @@ class DriverOfferService:
 
         return saved_offer
 
-    async def get_all_offers(self, user_id: int):
-        driver = await self.driver_repo.get_by_user_id(user_id)
-        if not driver:
-            raise HTTPException(status_code=404, detail="Водитель не найден")
-
-        offers = await self.offer_repo.get_offer_by_driver_id(driver.id)
-        return offers
-
     async def delete_offer(self, user_id: int, offer_id: int):
         driver = await self.driver_repo.get_by_user_id(user_id)
         if not driver:
@@ -75,3 +69,25 @@ class DriverOfferService:
             )
 
         await self.offer_repo.delete(offer.id)
+
+    async def get_my_offers(self, user_id: int, status: Optional[OfferStatus]):
+        driver = await self.driver_repo.get_by_user_id(user_id)
+        if not driver:
+            raise HTTPException(status_code=404, detail="Водитель не найден")
+
+        offers = await self.offer_repo.get_offers_by_driver_id(driver.id, status)
+        return offers
+
+    async def get_my_calendar(self, user_id: int):
+        driver = await self.driver_repo.get_by_user_id(user_id)
+        if not driver:
+            raise HTTPException(status_code=404, detail="Водитель не найден")
+
+        accepted_offers = await self.offer_repo.get_accepted_offers_by_driver(driver.id)
+
+        calendar_events = [
+            {"from_date": offer.order.from_date, "to_date": offer.order.to_date}
+            for offer in accepted_offers
+        ]
+
+        return calendar_events
