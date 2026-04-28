@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-
+from datetime import datetime
 
 class OfferResponse(BaseModel):
     id: int
@@ -25,3 +25,23 @@ class CompanyViewOfferDriverResponse(BaseModel):
     driver: DriverShortInfo
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderShortInfo(BaseModel):
+    id: int
+    transport_type: str
+    from_date: datetime
+    to_date: datetime
+    status: str
+    model_config = ConfigDict(from_attributes=True)
+    
+    
+class DriverViewOfferResponse(BaseModel):
+    id: int
+    status: str
+    order: OrderShortInfo
+    model_config = ConfigDict(from_attributes=True)
+    
+class DriverCalendarEvent(BaseModel):
+    from_date: datetime
+    to_date: datetime
