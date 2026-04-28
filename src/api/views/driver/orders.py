@@ -19,10 +19,11 @@ async def get_suitable_orders(
     user_id: int = Depends(RoleChecker([Role.DRIVER])),
     service: DriverService = Depends(),
 ):
+    """Водитель еще не откликнулся, но может отклкнутся на заказы котоые ему подходдят"""
     return await service.suitable_orders_for_drivers(user_id, from_date)
 
 
-@router.post("{order_id}/offers", response_model=OfferResponse)
+@router.post("/{order_id}/offers", response_model=OfferResponse)
 @in_session
 async def reply_offer(
     order_id: int,

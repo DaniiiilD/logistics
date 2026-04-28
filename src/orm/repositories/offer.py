@@ -19,12 +19,6 @@ class OfferRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_offers_by_driver_id(self, driver_id: int):
-        result = await self.session.execute(
-            select(OrderOffer).where(OrderOffer.driver_id == driver_id)
-        )
-        return result.scalars().all()
-
     async def get_all_offers_by_order(self, order_id: int):
         query = (
             select(OrderOffer)
@@ -60,28 +54,30 @@ class OfferRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_offers_by_driver_id(self, driver_id: int, status: Optional[OfferStatus] = None):
+    async def get_offers_by_driver_id(
+        self, driver_id: int, status: Optional[OfferStatus] = None
+    ):
         query = (
             select(OrderOffer)
             .options(selectinload(OrderOffer.order))
             .where(OrderOffer.driver_id == driver_id)
         )
-        
+
         if status:
             query = query.where(OrderOffer.status == status)
-        
+
         result = await self.session.execute(query)
         return result.scalars().all()
-            
+
     async def get_accepted_offers_by_driver(self, driver_id: int):
         query = (
             select(OrderOffer)
             .options(selectinload(OrderOffer.order))
-            .where(OrderOffer.driver_id == driver_id,
-                   OrderOffer.status == OfferStatus.ACCEPTED
+            .where(
+                OrderOffer.driver_id == driver_id,
+                OrderOffer.status == OfferStatus.ACCEPTED,
             )
         )
-        
+
         result = await self.session.execute(query)
         return result.scalars().all()
-        
