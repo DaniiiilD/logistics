@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package tariff;
+
+message GetDailyPriceRequest {
+    int32 days = 1;
+}
+
+message GetDailyPriceResponse {
+    int32 price_per_day = 1;
+    int32 total_price = 2;
+}
+
+service TariffService {
+    rpc CalculatePrice (GetDailyPriceRequest) returns (GetDailyPriceResponse);
+}
