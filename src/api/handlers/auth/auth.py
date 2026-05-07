@@ -6,8 +6,8 @@ from src.orm.repositories.company import CompanyRepository
 from src.schemas.requests.auth import DriverCreate, CompanyCreate
 from src.schemas.responses.auth import UserResponse
 from src.orm.models.user import User
-from src.orm.models.company import Company
-from src.orm.models.driver import Driver
+from src.orm.models.company.company import Company
+from src.orm.models.driver.driver import Driver
 
 
 class RegistrationService:

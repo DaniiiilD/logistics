@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from src.schemas.responses.auth import UserResponse
 from src.schemas.requests.auth import DriverCreate, CompanyCreate
 from src.api.middlewares.session import in_session
-from src.api.handlers.auth import RegistrationService
+from src.api.handlers.auth.auth import RegistrationService
 
 
 auth_router = APIRouter(prefix="/auth", tags=["Регистрация"])

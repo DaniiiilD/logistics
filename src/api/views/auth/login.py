@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response
 from src.schemas.responses.auth import LoginResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from src.api.middlewares.session import in_session
-from src.api.handlers.login import LoginService
+from src.api.handlers.auth.login import LoginService
 
 security = HTTPBasic()
 login_router = APIRouter(prefix="/login", tags=["Вход"])

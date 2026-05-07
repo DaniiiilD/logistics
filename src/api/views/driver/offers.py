@@ -3,7 +3,7 @@ from src.api.middlewares.session import in_session
 from src.api.middlewares.jwt_token import RoleChecker
 from src.core.constants import Role
 from typing import List, Optional
-from api.handlers.driver.offer import DriverOfferService
+from src.api.handlers.driver.offer import DriverOfferService
 from src.schemas.responses.offer import (
     DriverViewOfferResponse,
     DriverCalendarEvent,

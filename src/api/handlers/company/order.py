@@ -9,6 +9,7 @@ from src.orm.repositories.driver import DriverRepository
 from src.orm.repositories.offer import OfferRepository
 from src.api.services.celery.message_text import NotificationMessages
 from src.core.constants import OfferStatus, OrderStatus
+from src.api.services.grpc.client import AccountingGrpcService
 
 
 class OrderService:
@@ -19,6 +20,7 @@ class OrderService:
         user_repo: UserRepository = Depends(),
         driver_repo: DriverRepository = Depends(),
         offer_repo: OfferRepository = Depends(),
+        accounting_service: AccountingGrpcService = Depends()
     ):
 
         self.order_repo = order_repo
@@ -26,6 +28,7 @@ class OrderService:
         self.user_repo = user_repo
         self.driver_repo = driver_repo
         self.offer_repo = offer_repo
+        self.accounting_service = accounting_service
 
     async def get_company(self, user_id: int):
         """метож чтоб не дублировать код с поиком компании"""
@@ -54,16 +57,35 @@ class OrderService:
 
         return new_order
 
-    async def get_my_orders(self, user_id) -> list[Order]:
-        company = await self.get_company(user_id)
-        return await self.order_repo.get_active_order_by_company(company.id)
-
     async def get_order(self, user_id: int, order_id: int) -> Order:
         order = await self.order_repo.get_order_for_company_by_user(user_id, order_id)
         if not order:
             raise HTTPException(status_code=404, detail="Заказ не найден")
-        return order
+        trip_days = (order.to_date - order.from_date).days
+               
+        cost_data = await self.accounting_service.get_trip_cost(days = trip_days)
+        
+        return {
+            "order": order,
+            "accounting" : cost_data
+        }
+        
+    async def get_my_orders(self, user_id) -> list[Order]:
+        company = await self.get_company(user_id)
+        orders = await self.order_repo.get_active_order_by_company(company.id)
 
+        result = []
+        
+        for order in orders:
+            trip_days = (order.to_date - order.from_date).days
+            cost_data = await self.accounting_service.get_trip_cost(days = trip_days)
+            
+            result.append({
+                'order' : order,
+                'accounting' : cost_data
+            })
+        return result
+            
     async def update_order(
         self, user_id: int, order_id: int, data: OrderUpdate
     ) -> Order:

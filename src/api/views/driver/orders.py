@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from src.api.middlewares.session import in_session
 from src.api.middlewares.jwt_token import RoleChecker
 from src.core.constants import Role
-from api.handlers.driver.driver import DriverService
+from src.api.handlers.driver.driver import DriverService
 from src.schemas.responses.orders import OrderResponse
 from typing import Optional
 from datetime import datetime
 from src.schemas.responses.offer import OfferResponse
-from api.handlers.driver.offer import DriverOfferService
+from src.api.handlers.driver.offer import DriverOfferService
 
 router = APIRouter(prefix="/orders", tags=["Заказы водителя"])
 

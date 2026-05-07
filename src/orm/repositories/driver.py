@@ -1,4 +1,4 @@
-from src.orm.models.driver import Driver
+from src.orm.models.driver.driver import Driver
 from src.orm.repositories.base import BaseRepository
 from sqlalchemy import select
 

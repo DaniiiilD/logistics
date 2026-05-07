@@ -1,4 +1,4 @@
-from src.orm.models.company import Company
+from src.orm.models.company.company import Company
 from src.orm.repositories.base import BaseRepository
 from sqlalchemy import select
 

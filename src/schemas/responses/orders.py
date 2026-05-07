@@ -12,3 +12,12 @@ class OrderResponse(BaseModel):
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CostDataResponse(BaseModel):
+    price_per_day: int
+    total_price: int
+    
+class OrderWithCostResponse(BaseModel):
+    order: OrderResponse
+    accounting: CostDataResponse | None

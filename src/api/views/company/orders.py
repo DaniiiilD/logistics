@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from src.api.middlewares.session import in_session
 from src.api.middlewares.jwt_token import RoleChecker
-from src.schemas.responses.orders import OrderResponse
+from src.schemas.responses.orders import OrderResponse, OrderWithCostResponse, CostDataResponse
 from src.schemas.requests.orders import OrderCreate, OrderUpdate
-from api.handlers.company.order import OrderService
+from src.api.handlers.company.order import OrderService
 from src.core.constants import Role
 from src.schemas.responses.offer import CompanyViewOfferDriverResponse
 
@@ -20,7 +20,7 @@ async def create_order(
     return await service.create_order(data, user_id)
 
 
-@router.get("", response_model=list[OrderResponse])
+@router.get("", response_model=list[OrderWithCostResponse])
 @in_session
 async def get_my_orders(
     user_id: int = Depends(RoleChecker([Role.COMPANY])),
@@ -29,7 +29,7 @@ async def get_my_orders(
     return await service.get_my_orders(user_id)
 
 
-@router.get("/{order_id}", response_model=OrderResponse)
+@router.get("/{order_id}", response_model=OrderWithCostResponse)
 @in_session
 async def get_order(
     order_id: int,
