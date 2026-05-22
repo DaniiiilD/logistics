@@ -17,7 +17,8 @@ class OrderResponse(BaseModel):
 class CostDataResponse(BaseModel):
     price_per_day: int
     total_price: int
-    
+
+
 class OrderWithCostResponse(BaseModel):
     order: OrderResponse
     accounting: CostDataResponse | None

@@ -19,9 +19,11 @@ class Settings(BaseSettings):
     EMAIL_PORT: int
     EMAIL_USER: str
     EMAIL_PASS: str
-    
-    gRPC_HOST: str = 'localhost'
+
+    gRPC_HOST: str = "localhost"
     gRPC_PORT: int = 50051
+
+    TELEGRAM_TOKEN: str
 
     @property
     def REDIS_URL(self) -> str:

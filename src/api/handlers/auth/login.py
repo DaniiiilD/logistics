@@ -13,7 +13,7 @@ class LoginService:
         self, username: str, password: str, response: Response
     ) -> LoginResponse:
 
-        user = await self.user_repo.get_by_email(username)
+        user = await self.user_repo.get_user_by_email(username)
         if not user:
             raise HTTPException(status_code=401, detail="Неверный email или пароль")
 

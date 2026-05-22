@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, BigInteger
 from src.orm.database import Base
 from sqlalchemy.orm import relationship
 
@@ -10,6 +10,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)
+    telegram_id = Column(BigInteger, unique=True, index=True, nullable=True)
 
     driver = relationship("Driver", back_populates="user", uselist=False)
     company = relationship("Company", back_populates="user", uselist=False)
