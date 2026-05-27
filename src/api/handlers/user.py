@@ -14,7 +14,7 @@ from src.core.redis import get_redis
 from src.core.redis import redis_client
 from src.api.services.celery.tasks import send_notification_email
 import random
-
+from src.core.security import hash_tg_id, encrypt_tg_id
 
 class UserService:
     def __init__(
@@ -122,11 +122,19 @@ class UserService:
 
         if not user_id:
             raise ValueError("Срок действия ссылки истек. Получите новую на сайте.")
-        await self.user_repo.update(int(user_id), {"telegram_id": telegram_id})
+        
+        update_data = {
+            "telegram_hash_id": hash_tg_id(telegram_id),
+            "telegram_id_encrypted": encrypt_tg_id(telegram_id),
+            "telegram_id": None
+        }
+        
+        await self.user_repo.update(int(user_id), update_data)
         await self.redis.delete(key)
 
     async def get_user_by_tg_id(self, tg_id: int):
-        return await self.user_repo.get_user_by_tg_id(tg_id)
+        tg_hash = hash_tg_id(tg_id)
+        return await self.user_repo.get_user_by_tg_hash(tg_hash)
 
     async def get_user_by_email(self, email: str):
         return await self.user_repo.get_user_by_email(email)

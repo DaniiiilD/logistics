@@ -4,6 +4,7 @@ from src.orm.repositories.base import BaseRepository
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import func
+from src.core.security import hash_tg_id
 
 
 class UserRepository(BaseRepository):
@@ -43,23 +44,30 @@ class UserRepository(BaseRepository):
         return list(result.scalars().all())
 
     async def get_user_by_tg_id(self, tg_id: int):
+        tg_hash = hash_tg_id(tg_id)
         result = await self.session.execute(
             select(User)
-            .where(User.telegram_id == tg_id)
+            .where(User.telegram_hash_id == tg_hash)
             .options(selectinload(User.driver))
         )
         return result.scalar_one_or_none()
 
-    async def get_driver_tg_ids_by_transport_type(
-        self, transport_type: str
-    ) -> list[int]:
+    async def get_driver_tg_ids_by_transport_type(self, transport_type: str) -> list[int]:
         query = (
-            select(User.telegram_id)
+            select(User.telegram_id_encrypted)
             .join(Driver)
             .where(
                 func.lower(Driver.transport_type) == transport_type.lower().strip(),
-                User.telegram_id.is_not(None),
+                User.telegram_id_encrypted.is_not(None),
             )
         )
         result = await self.session.execute(query)
         return list(result.scalars().all())
+    
+    async def get_user_by_tg_hash(self, tg_hash: str):
+        result = await self.session.execute(
+            select(User)
+            .where(User.telegram_hash_id == tg_hash)
+            .options(selectinload(User.driver))
+        )
+        return result.scalar_one_or_none()

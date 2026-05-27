@@ -1,29 +1,32 @@
 from aiogram import Router, F, types
 from src.api.handlers.user import UserService
+from src.api.bot.utils.decorators import delete_user_message
+from src.api.bot.utils.messages import BotMessages
 
 router = Router()
 
 
 @router.message(F.text == "Профиль")
+@delete_user_message
 async def show_profile(message: types.Message, user_service: UserService):
-    await message.delete()
 
     user = await user_service.get_user_by_tg_id(message.from_user.id)
     if user and user.driver:
         await message.answer(
-            f"Ваш прифиль:\n"
-            f"ФИО: {user.driver.full_name}\n"
-            f"Телефон: {user.driver.phone}\n"
-            f"Трансопрт: {user.driver.transport_type}"
+            BotMessages.Menu.PROFILE.format(
+                full_name=user.driver.full_name,
+                phone=user.driver.phone,
+                transport_type=user.deiver.transport_type
+            )
         )
     else:
-        await message.answer("Профиль не найден. Пожалуйста авторизуйтесь!")
+        await message.answer(BotMessages.Menu.NOT_FOUND)
 
 
 @router.message(F.text == "Помощь")
+@delete_user_message
 async def show_help(message: types.Message):
-    await message.delete()
-    await message.answer("Здесь будет помощь по навигации и работе с заказами.")
+    await message.answer(BotMessages.Menu.HELP)
 
 
 @router.callback_query(F.data == "main_menu")

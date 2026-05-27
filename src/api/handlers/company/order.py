@@ -146,8 +146,8 @@ class OrderService:
 
         return await self.offer_repo.get_all_offers_by_order(order.id)
 
-    async def get_orders_for_bot(self, transport_type: str, page: int = 0):
-        limit = 5
+    async def get_orders_for_bot(self, transport_type: str, page: int = 0, limit: int = 5):
+    
         offset = page * limit
 
         orders = await self.order_repo.get_active_orders_paginated(

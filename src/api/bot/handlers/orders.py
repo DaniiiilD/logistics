@@ -9,25 +9,33 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import (
     InlineKeyboardButton,
 )
+from src.api.bot.utils.decorators import delete_user_message
+from src.api.bot.utils.messages import BotMessages
+from aiogram.exceptions import TelegramBadRequest
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 
 
 @router.message(F.text == "Мои Заявки")
+@delete_user_message
 async def show_orders_menu(
     message: types.Message,
     order_service: OrderService,
     user_service: UserService,
     state: FSMContext,
 ):
-    await message.delete()
 
     data = await state.get_data()
     if last_id := data.get("last_msg_id"):
         try:
             await message.bot.delete_message(message.chat.id, last_id)
-        except:
-            pass
+        except TelegramBadRequest as e:
+            logger.debug(f"Не удалось удалить сообщение: {e.message}")
+        except Exception as e:
+            logger.error(f'Критическая ошибка при удалении сообщения', exc_info=True)
 
     user = await user_service.get_user_by_tg_id(message.from_user.id)
     driver_transport = user.driver.transport_type
@@ -37,10 +45,10 @@ async def show_orders_menu(
     )
 
     if not orders:
-        msg = await message.answer("Активных заявок пока нет.")
+        msg = await message.answer(BotMessages.Orders.NO_ACTIVE)
     else:
         msg = await message.answer(
-            "*Список доступных заявок:*",
+            BotMessages.Orders.AVAILABLE_LIST,
             reply_markup=get_orders_list_kb(orders, 0, total_pages),
             parse_mode="Markdown",
         )
@@ -62,7 +70,7 @@ async def process_orders_pagination(
     )
 
     await callback.message.edit_text(
-        "*Список доступных заявок:*",
+        BotMessages.Orders.AVAILABLE_LIST,
         reply_markup=get_orders_list_kb(orders, page, total_pages),
         parse_mode="Markdown",
     )
@@ -79,16 +87,17 @@ async def process_order_view(
     order = await order_service.get_order_with_details_for_drivers(order_id)
 
     if not order:
-        await callback.answer("Заказ больше не актуален", show_alert=True)
+        await callback.answer(BotMessages.Orders.OUTDATED, show_alert=True)
         return
 
-    detail_text = (
-        f"*Заказ №{order.id}*\n\n"
-        f"*Отправитель:* {order.company.company_name}\n"
-        f"*Тип авто:* {order.transport_type}\n"
-        f"*Даты доставки:* {order.from_date.strftime('%d.%m.%y')} - {order.to_date.strftime('%d.%m.%y')}\n"
+    detail_text = BotMessages.Orders.DETAIL.format(
+        order_id=order_id,
+        company_name=order.company.company_name,
+        transport_type=order.transport_type,
+        from_date=order.from_date.strftime('%d.%m.%y'),
+        to_date=order.to_date.strftime('%d.%m.%y')
     )
-
+    
     builder = InlineKeyboardBuilder()
 
     builder.row(
@@ -112,7 +121,7 @@ async def order_confirm(callback: types.CallbackQuery):
 
     order_id = int(callback.data.split(":")[1])
 
-    confirm_text = f"*Вы увернеы что хотите откликнуться на заказ №{order_id}*"
+    confirm_text = BotMessages.Orders.CONFIRM_APPLY.format(order_id=order_id)
 
     builder = InlineKeyboardBuilder()
     builder.button(
@@ -140,19 +149,18 @@ async def process_order_apply_final(
     user = await user_service.get_user_by_tg_id(callback.from_user.id)
 
     if not user:
-        await callback.answer("Ошибка: пользователь не найден.")
+        await callback.answer(BotMessages.Orders.USER_NOT_FOUND)
         return
 
     try:
         await offer_service.create_offer(user_id=user.id, order_id=order_id)
         await callback.message.edit_text(
-            f"*Заявка на заказ №{order_id} успешно отправлена!*\n\n"
-            "Компания получила ваше уведомление. Если вас выберут, бот пришлет сообщение.",
+            BotMessages.Orders.APPLY_SUCCESS.format(order_id=order_id),
             parse_mode="Markdown",
         )
     except HTTPException as e:
         await callback.message.answer(f"{e.detail}")
     except Exception:
-        await callback.message.answer("Произошла ошибка при отправке заявки.")
+        await callback.message.answer(BotMessages.Orders.APPLY_ERROR)
 
     await callback.answer()

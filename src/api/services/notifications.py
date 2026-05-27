@@ -1,16 +1,23 @@
+from src.core.security import decrypt_tg_id
+from src.api.bot.utils.messages import BotMessages
+import logging
+
+logger = logging.getLogger(__name__)
+
 class NotificationService:
     async def notify_new_order(
-        self, tg_ids: list[int], order_id: int, transport_type: str
+        self, encrypted_tg_ids: list[str], order_id: int, transport_type: str
     ):
         from src.api.bot.setup import bot
 
-        for tg_id in tg_ids:
+        for enc_id in encrypted_tg_ids:
             try:
-                text = (
-                    f"*Новый заказ №{order_id}*\n"
-                    f"Нужен трансопрт: {transport_type}\n"
-                    f"Заходите в 'Мои Заявки', чтобы откликнуться!"
+                real_tg_id = decrypt_tg_id(enc_id)
+                text = BotMessages.NOTIFICATIONS.NEW_ORDER.format(
+                    order_id=order_id,
+                    transport_type=transport_type
                 )
-                await bot.send_message(chat_id=tg_id, text=text, parse_mode="Markdown")
+                
+                await bot.send_message(chat_id=real_tg_id, text=text, parse_mode="Markdown")
             except Exception as e:
-                print(f"Ошибка отпраки пользователю {tg_id} {e}")
+                logger.error(f'Ошибка отправки уведомления в TG для {real_tg_id}:{e}', exc_info=True)

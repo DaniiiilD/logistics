@@ -11,6 +11,8 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False)
     telegram_id = Column(BigInteger, unique=True, index=True, nullable=True)
+    telegram_hash_id = Column(String, unique=True, index=True, nullable=True)
+    telegram_id_encrypted=Column(String, nullable=True)
 
     driver = relationship("Driver", back_populates="user", uselist=False)
     company = relationship("Company", back_populates="user", uselist=False)
