@@ -16,7 +16,7 @@ async def show_profile(message: types.Message, user_service: UserService):
             BotMessages.Menu.PROFILE.format(
                 full_name=user.driver.full_name,
                 phone=user.driver.phone,
-                transport_type=user.deiver.transport_type
+                transport_type=user.driver.transport_type
             )
         )
     else:

@@ -37,6 +37,15 @@ class DriverOfferService:
                 status_code=400, detail="Этот заказ не достпуен для отклика"
             )
 
+        driver_transport = (driver.transport_type or "").strip().lower()
+        order_transport = (order.transport_type or "").strip().lower()
+        
+        if driver_transport != order_transport:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Тип транспорта водителя {driver.transport_type} не подходит под тип заказа {order.transport_type}"
+            )
+        
         existing_offer = await self.offer_repo.check_offer_exists(driver.id, order.id)
         if existing_offer:
             raise HTTPException(
@@ -57,7 +66,7 @@ class DriverOfferService:
     async def delete_offer(self, user_id: int, offer_id: int):
         driver = await self.driver_repo.get_by_user_id(user_id)
         if not driver:
-            raise HTTPException(satatus_code=404, detail="Водитель не найден")
+            raise HTTPException(status_code=404, detail="Водитель не найден")
 
         offer = await self.offer_repo.get_by_id(offer_id)
         if not offer:
@@ -93,10 +102,7 @@ class DriverOfferService:
 
 
 def create_offer_service_manual() -> DriverOfferService:
-    from src.orm.repositories.offer import OfferRepository
-    from src.orm.repositories.order import OrderRepository
-    from src.orm.repositories.driver import DriverRepository
-
+    
     return DriverOfferService(
         order_repo=OrderRepository(),
         driver_repo=DriverRepository(),

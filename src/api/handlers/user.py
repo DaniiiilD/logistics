@@ -126,7 +126,6 @@ class UserService:
         update_data = {
             "telegram_hash_id": hash_tg_id(telegram_id),
             "telegram_id_encrypted": encrypt_tg_id(telegram_id),
-            "telegram_id": None
         }
         
         await self.user_repo.update(int(user_id), update_data)
@@ -150,27 +149,28 @@ class UserService:
         )
         return True
 
-    async def vetify_login_user(self, email: str, code: str, telegram_id: int) -> bool:
+    async def verify_login_user(self, email: str, code: str, telegram_id: int) -> bool:
         key = f"auth_code:{email}"
         saved_code = await self.redis.get(key)
 
         if saved_code and saved_code == code:
             user = await self.user_repo.get_user_by_email(email)
             if user:
-                await self.user_repo.update(user.id, {"telegram_id": telegram_id})
+                await self.user_repo.update(user.id, {
+                    "telegram_hash_id": hash_tg_id(telegram_id),
+                    "telegram_id_encrypted": encrypt_tg_id(telegram_id)
+                    })
                 return True
         else:
             return False
 
 
 def create_user_service_manual():
-    from src.orm.repositories.driver import DriverRepository
-    from src.orm.repositories.company import CompanyRepository
-    from src.orm.repositories.user import UserRepository
-
+    
     return UserService(
         user_repo=UserRepository(),
         driver_repo=DriverRepository(),
         company_repo=CompanyRepository(),
         redis=redis_client,
     )
+    

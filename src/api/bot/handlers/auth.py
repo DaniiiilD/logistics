@@ -63,7 +63,7 @@ async def process_code(
     data = await state.get_data()
     email = data.get("email")
 
-    success = await user_service.vetify_login_user(
+    success = await user_service.verify_login_user(
         email=email, code=code, telegram_id=message.from_user.id
     )
 

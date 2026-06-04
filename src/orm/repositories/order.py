@@ -104,3 +104,4 @@ class OrderRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+    

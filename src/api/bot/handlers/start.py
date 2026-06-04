@@ -28,7 +28,7 @@ async def cmd_start(
 
     if user:
         if user.role != Role.DRIVER.value:
-            await message.answer(BotMessages.Start.a)
+            await message.answer(BotMessages.Start.ACCESS_DENIED)
             return
         await message.answer(
             f"С возвращением, {user.driver.full_name if user.driver else 'Водитель'}!",

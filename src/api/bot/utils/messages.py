@@ -37,7 +37,7 @@ class BotMessages:
         
     class Start:
         ACCOUNT_LINKED = ("Аккаунт успешно привязан!")
-        ACCESS_DENIED = ("Доступ Запрещен. Этот бот прднаазначен для водителей.")
+        ACCESS_DENIED = ("Доступ Запрещен. Этот бот прeдназначен для водителей.")
         WELCOME_BACK = ("С возвращением, {user.driver.full_name} if {user.driver} else 'Водитель'}!")
         WELCOME_NEW = "Добро пожаловать! Пожалуйста, авторизуйтеся для работы."
     
