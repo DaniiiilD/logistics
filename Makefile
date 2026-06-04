@@ -15,3 +15,9 @@ ruff:
 
 grpc: 
 	uv run python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. src/api/grpc/tariff.proto
+
+docker:
+	docker-compose up -d
+
+celery: 
+	uv run celery -A src.api.services.celery.celery_app worker --loglevel=info -P solo

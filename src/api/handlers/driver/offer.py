@@ -89,5 +89,16 @@ class DriverOfferService:
             {"from_date": offer.order.from_date, "to_date": offer.order.to_date}
             for offer in accepted_offers
         ]
-
         return calendar_events
+
+
+def create_offer_service_manual() -> DriverOfferService:
+    from src.orm.repositories.offer import OfferRepository
+    from src.orm.repositories.order import OrderRepository
+    from src.orm.repositories.driver import DriverRepository
+
+    return DriverOfferService(
+        order_repo=OrderRepository(),
+        driver_repo=DriverRepository(),
+        offer_repo=OfferRepository(),
+    )

@@ -10,6 +10,7 @@ from src.orm.repositories.offer import OfferRepository
 from src.api.services.celery.message_text import NotificationMessages
 from src.core.constants import OfferStatus, OrderStatus
 from src.api.services.grpc.client import AccountingGrpcService
+from src.api.services.notifications import NotificationService
 
 
 class OrderService:
@@ -20,7 +21,8 @@ class OrderService:
         user_repo: UserRepository = Depends(),
         driver_repo: DriverRepository = Depends(),
         offer_repo: OfferRepository = Depends(),
-        accounting_service: AccountingGrpcService = Depends()
+        notification_service: NotificationService = Depends(),
+        accounting_service: AccountingGrpcService = Depends(),
     ):
 
         self.order_repo = order_repo
@@ -28,6 +30,7 @@ class OrderService:
         self.user_repo = user_repo
         self.driver_repo = driver_repo
         self.offer_repo = offer_repo
+        self.notification_service = notification_service
         self.accounting_service = accounting_service
 
     async def get_company(self, user_id: int):
@@ -41,6 +44,9 @@ class OrderService:
 
         company = await self.get_company(user_id)
         order_dict = data.model_dump()
+
+        order_dict["transport_type"] = order_dict["transport_type"].lower().strip()
+
         order_dict["company_id"] = company.id
         new_order = await self.order_repo.create(Order(**order_dict))
 
@@ -55,6 +61,16 @@ class OrderService:
         for email in drivers_emails:
             send_notification_email.delay(email, new_order.id, driver_message)
 
+        tg_ids = await self.user_repo.get_driver_tg_ids_by_transport_type(
+            new_order.transport_type
+        )
+
+        await self.notification_service.notify_new_order(
+            tg_ids=tg_ids,
+            order_id=new_order.id,
+            transport_type=new_order.transport_type,
+        )
+
         return new_order
 
     async def get_order(self, user_id: int, order_id: int) -> Order:
@@ -62,30 +78,24 @@ class OrderService:
         if not order:
             raise HTTPException(status_code=404, detail="Заказ не найден")
         trip_days = (order.to_date - order.from_date).days
-               
-        cost_data = await self.accounting_service.get_trip_cost(days = trip_days)
-        
-        return {
-            "order": order,
-            "accounting" : cost_data
-        }
-        
+
+        cost_data = await self.accounting_service.get_trip_cost(days=trip_days)
+
+        return {"order": order, "accounting": cost_data}
+
     async def get_my_orders(self, user_id) -> list[Order]:
         company = await self.get_company(user_id)
         orders = await self.order_repo.get_active_order_by_company(company.id)
 
         result = []
-        
+
         for order in orders:
             trip_days = (order.to_date - order.from_date).days
-            cost_data = await self.accounting_service.get_trip_cost(days = trip_days)
-            
-            result.append({
-                'order' : order,
-                'accounting' : cost_data
-            })
+            cost_data = await self.accounting_service.get_trip_cost(days=trip_days)
+
+            result.append({"order": order, "accounting": cost_data})
         return result
-            
+
     async def update_order(
         self, user_id: int, order_id: int, data: OrderUpdate
     ) -> Order:
@@ -135,3 +145,41 @@ class OrderService:
             raise HTTPException(status_code=403, detail="У вас нет прав на этот заказ")
 
         return await self.offer_repo.get_all_offers_by_order(order.id)
+
+    async def get_orders_for_bot(self, transport_type: str, page: int = 0, limit: int = 5):
+    
+        offset = page * limit
+
+        orders = await self.order_repo.get_active_orders_paginated(
+            limit, offset, transport_type
+        )
+        total_count = await self.order_repo.get_active_orders_count_by_transport_type(
+            transport_type
+        )
+
+        import math
+
+        total_pages = math.ceil(total_count / limit) if total_count > 0 else 1
+        return orders, total_pages
+
+    async def get_order_with_details_for_drivers(self, order_id: int):
+        return await self.order_repo.get_order_with_details(order_id)
+
+
+def create_order_service_manual() -> OrderService:
+    from src.orm.repositories.offer import OfferRepository
+    from src.api.services.notifications import NotificationService
+    from src.orm.repositories.user import UserRepository
+    from src.orm.repositories.company import CompanyRepository
+    from src.orm.repositories.driver import DriverRepository
+    from src.api.services.grpc.client import AccountingGrpcService
+
+    return OrderService(
+        order_repo=OrderRepository(),
+        company_repo=CompanyRepository(),
+        user_repo=UserRepository(),
+        driver_repo=DriverRepository(),
+        offer_repo=OfferRepository(),
+        notification_service=NotificationService(),
+        accounting_service=AccountingGrpcService(),
+    )

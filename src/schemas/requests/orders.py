@@ -12,12 +12,12 @@ class OrderCreate(BaseModel):
     def validate_and_clean_dates(self):
         if self.to_date < self.from_date:
             raise ValueError("Дата окончания не может быть раньше даты начала")
-        
+
         if self.from_date.tzinfo is not None:
             self.from_date = self.from_date.replace(tzinfo=None)
         if self.to_date.tzinfo is not None:
             self.to_date = self.to_date.replace(tzinfo=None)
-            
+
         return self
 
 

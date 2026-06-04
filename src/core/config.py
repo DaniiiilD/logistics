@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-
+from cryptography.fernet import Fernet
 
 class Settings(BaseSettings):
     DB_USER: str
@@ -19,9 +19,13 @@ class Settings(BaseSettings):
     EMAIL_PORT: int
     EMAIL_USER: str
     EMAIL_PASS: str
-    
-    gRPC_HOST: str = 'localhost'
+
+    gRPC_HOST: str = "localhost"
     gRPC_PORT: int = 50051
+
+    TELEGRAM_TOKEN: str
+    
+    ENCRYPTION_KEY: str
 
     @property
     def REDIS_URL(self) -> str:

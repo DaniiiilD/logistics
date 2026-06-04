@@ -23,7 +23,7 @@ class RegistrationService:
 
     async def register_driver(self, driver_data: DriverCreate) -> UserResponse:
 
-        if await self.user_repo.get_by_email(driver_data.email):
+        if await self.user_repo.get_user_by_email(driver_data.email):
             raise HTTPException(status_code=400, detail="Этот email уже занят")
 
         new_user = User(
@@ -46,7 +46,7 @@ class RegistrationService:
 
     async def register_company(self, company_data: CompanyCreate) -> UserResponse:
 
-        if await self.user_repo.get_by_email(company_data.email):
+        if await self.user_repo.get_user_by_email(company_data.email):
             raise HTTPException(status_code=400, detail="Этот email уже занят")
 
         new_user = User(

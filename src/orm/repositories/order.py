@@ -3,7 +3,7 @@ from typing import Optional
 from src.orm.models.company.order import Order
 from src.orm.models.company.company import Company
 from src.orm.repositories.base import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from src.core.constants import OrderStatus
 
@@ -60,6 +60,47 @@ class OrderRepository(BaseRepository):
             select(Order)
             .options(selectinload(Order.company).selectinload(Company.user))
             .where(Order.id == order_id)
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    async def get_active_orders_paginated(
+        self, limit: int, offset: int, transport_type: str
+    ):
+        """Возврадащает список заказов для текущей страницы"""
+        query = (
+            select(Order)
+            .where(
+                Order.status == OrderStatus.SEARCH,
+                Order.is_active == True,
+                func.lower(Order.transport_type) == transport_type.lower().strip(),
+            )
+            .options(selectinload(Order.company))
+            .limit(limit)
+            .offset(offset)
+            .order_by(Order.id.desc())
+        )
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def get_active_orders_count_by_transport_type(
+        self, transport_type: str
+    ) -> int:
+        """Возвращает общее число заказов дотсупных"""
+        query = select(func.count(Order.id)).where(
+            Order.status == OrderStatus.SEARCH,
+            Order.is_active == True,
+            func.lower(Order.transport_type) == transport_type.lower().strip(),
+        )
+
+        result = await self.session.execute(query)
+        return result.scalar() or 0
+
+    async def get_order_with_details(self, order_id: int):
+        query = (
+            select(Order)
+            .where(Order.id == order_id, Order.is_active == True)
+            .options(selectinload(Order.company))
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
