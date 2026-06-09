@@ -26,8 +26,8 @@ mcp:
 	npx @modelcontextprotocol/inspector uv run mcp-start
 	$env:PYTHONPATH="."; npx @modelcontextprotocol/inspector uv run mcp-start
 
-test:uv run pytest --cov=src
-	
+test:
+	uv run pytest --cov=src
 	uv run pytest
 	uv run pytest --cov=src --cov-report=html
 	Start-Process htmlcov/index.html

@@ -161,6 +161,7 @@ class UserService:
                     "telegram_id_encrypted": encrypt_tg_id(telegram_id)
                     })
                 return True
+            return False
         else:
             return False
 
