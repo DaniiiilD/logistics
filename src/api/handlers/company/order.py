@@ -67,7 +67,7 @@ class OrderService:
         )
 
         await self.notification_service.notify_new_order(
-            tg_ids=tg_ids,
+            encrypted_tg_ids=tg_ids,
             order_id=new_order.id,
             transport_type=new_order.transport_type,
         )

@@ -16,3 +16,16 @@ services:
       - "1025:1025"
       - "8025:8025"
     restart: always
+
+  centrifugo:
+    image: centrifugo/centrifugo:v5
+    container_name: logistics_centrifugo
+    environment:
+      - CENTRIFUGO_ADMIN=true 
+      - CENTRIFUGO_ADMIN_INSECURE=true
+      - CENTRIFUGO_API_KEY=key
+      - CENTRIFUGO_CLIENT_INSECURE=true
+      - CENTRIFUGO_ALLOWED_ORIGINS=*
+    ports:
+      - "8001:8000"
+    restart: always

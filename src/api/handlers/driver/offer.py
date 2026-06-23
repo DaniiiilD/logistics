@@ -8,7 +8,7 @@ from src.api.services.celery.tasks import send_notification_email
 from src.api.services.celery.message_text import NotificationMessages
 from typing import Optional
 from src.core.constants import OfferStatus
-
+from src.api.services.centrifugo.realtime import RealtimeService
 
 class DriverOfferService:
     def __init__(
@@ -16,11 +16,13 @@ class DriverOfferService:
         offer_repo: OfferRepository = Depends(),
         order_repo: OrderRepository = Depends(),
         driver_repo: DriverRepository = Depends(),
+        realtime_service: RealtimeService = Depends(),
     ):
 
         self.offer_repo = offer_repo
         self.order_repo = order_repo
         self.driver_repo = driver_repo
+        self.realtime_service = realtime_service
 
     async def create_offer(self, user_id: int, order_id: int) -> OrderOffer:
 
@@ -61,6 +63,14 @@ class DriverOfferService:
         company_email = order.company.user.email
         send_notification_email.delay(company_email, order.id, message)
 
+        await self.realtime_service.notify_new_offer(
+            company_id=order.company_id,
+            order_id = order.id,
+            driver_name = driver.full_name,
+            transport_type=driver.transport_type,
+        )
+        
+        
         return saved_offer
 
     async def delete_offer(self, user_id: int, offer_id: int):
@@ -107,4 +117,5 @@ def create_offer_service_manual() -> DriverOfferService:
         order_repo=OrderRepository(),
         driver_repo=DriverRepository(),
         offer_repo=OfferRepository(),
+        realtime_service=RealtimeService(),
     )

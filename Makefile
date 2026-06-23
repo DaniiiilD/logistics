@@ -31,3 +31,6 @@ test:
 	uv run pytest
 	uv run pytest --cov=src --cov-report=html
 	Start-Process htmlcov/index.html
+
+html:
+	uv run python -m http.server 8080

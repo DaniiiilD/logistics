@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     TELEGRAM_TOKEN: str
     
     ENCRYPTION_KEY: str
+    
+    CENTRIFUGO_API_URL: str = "http://127.0.0.1:8001/api"
+    CENTRIFUGO_API_KEY: str = "key"
 
     @property
     def REDIS_URL(self) -> str:

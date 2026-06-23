@@ -18,6 +18,7 @@ dependencies = [
     "fastmcp>=3.3.1",
     "grpcio>=1.80.0",
     "grpcio-tools>=1.80.0",
+    "httpx>=0.28.1",
     "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.11",
     "pydantic-settings>=2.13.1",
