@@ -21,3 +21,13 @@ docker:
 
 celery: 
 	uv run celery -A src.api.services.celery.celery_app worker --loglevel=info -P solo
+
+mcp:
+	npx @modelcontextprotocol/inspector uv run mcp-start
+	$env:PYTHONPATH="."; npx @modelcontextprotocol/inspector uv run mcp-start
+
+test:
+	uv run pytest --cov=src
+	uv run pytest
+	uv run pytest --cov=src --cov-report=html
+	Start-Process htmlcov/index.html

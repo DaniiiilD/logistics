@@ -11,6 +11,7 @@ from src.api.services.celery.message_text import NotificationMessages
 from src.core.constants import OfferStatus, OrderStatus
 from src.api.services.grpc.client import AccountingGrpcService
 from src.api.services.notifications import NotificationService
+import math
 
 
 class OrderService:
@@ -157,8 +158,6 @@ class OrderService:
             transport_type
         )
 
-        import math
-
         total_pages = math.ceil(total_count / limit) if total_count > 0 else 1
         return orders, total_pages
 
@@ -167,13 +166,7 @@ class OrderService:
 
 
 def create_order_service_manual() -> OrderService:
-    from src.orm.repositories.offer import OfferRepository
-    from src.api.services.notifications import NotificationService
-    from src.orm.repositories.user import UserRepository
-    from src.orm.repositories.company import CompanyRepository
-    from src.orm.repositories.driver import DriverRepository
-    from src.api.services.grpc.client import AccountingGrpcService
-
+    
     return OrderService(
         order_repo=OrderRepository(),
         company_repo=CompanyRepository(),

@@ -1,14 +1,14 @@
 from src.core.security import decrypt_tg_id
 from src.api.bot.utils.messages import BotMessages
 import logging
-
+from src.api.bot.bot_instance import bot
+        
 logger = logging.getLogger(__name__)
 
 class NotificationService:
     async def notify_new_order(
         self, encrypted_tg_ids: list[str], order_id: int, transport_type: str
     ):
-        from src.api.bot.setup import bot
 
         for enc_id in encrypted_tg_ids:
             try:
